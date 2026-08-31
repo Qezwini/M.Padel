@@ -19,8 +19,11 @@
       --slot-bg: rgba(255, 255, 255, 0.04);
       --slot-border: rgba(255, 255, 255, 0.07);
       --booked-bg: rgba(239, 68, 68, 0.08);
-      --booked-border: rgba(239, 68, 68, 0.2);
+      --booked-border: rgba(239, 68, 68, 0.25);
       --booked-text: #ef4444;
+      --expired-bg: rgba(255, 255, 255, 0.02);
+      --expired-border: rgba(255, 255, 255, 0.04);
+      --expired-text: #475569;
     }
 
     * {
@@ -51,6 +54,7 @@
       max-width: 440px;
       padding: 28px 20px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
     }
 
     .brand-title {
@@ -136,14 +140,16 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      user-select: none;
     }
-    
+
     .slot-btn .slot-time-box {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
       direction: ltr !important;
+      unicode-bidi: bidi-override;
       font-size: 13px;
       font-weight: 700;
       color: #fff;
@@ -164,15 +170,37 @@
     .slot-btn.booked {
       background: var(--booked-bg);
       border-color: var(--booked-border);
-      cursor: not-allowed;
-      opacity: 0.55;
+      cursor: pointer;
     }
     .slot-btn.booked .slot-time-box {
-      color: #64748b;
+      color: #94a3b8;
       text-decoration: line-through;
     }
     .slot-btn.booked .slot-status {
       color: var(--booked-text);
+    }
+
+    .slot-btn.expired {
+      background: var(--expired-bg);
+      border-color: var(--expired-border);
+      cursor: pointer;
+      opacity: 0.35;
+    }
+    .slot-btn.expired .slot-time-box {
+      color: var(--expired-text);
+      text-decoration: line-through;
+    }
+    .slot-btn.expired .slot-status {
+      color: var(--expired-text);
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .shake-anim {
+      animation: shake 0.35s ease-in-out;
     }
 
     .input-group {
@@ -301,6 +329,59 @@
     .social-btn.whatsapp svg {
       fill: #25d366;
     }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #121e31;
+      border: 1px solid var(--primary);
+      box-shadow: 0 0 25px var(--primary-glow);
+      border-radius: 24px;
+      padding: 30px 20px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+    }
+    .modal-icon {
+      font-size: 50px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .modal-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .modal-close-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #05140d;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -311,7 +392,7 @@
     <span class="section-label">اختر يوم الحجز</span>
     <div class="days-scroll" id="daysList"></div>
 
-    <span class="section-label">الأوقات المتاحة (يمكنك تحديد عدة ساعات)</span>
+    <span class="section-label">الأوقات المتاحة (يمكنك تحديد ساعات متتالية)</span>
     <div class="slots-grid" id="slotsGrid"></div>
 
     <div class="input-group">
@@ -356,23 +437,34 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-box">
+      <span class="modal-icon">✅</span>
+      <div class="modal-title">تم استلام طلبك بنجاح</div>
+      <div class="modal-desc">
+        شكراً لك! تم تثبيت طلب الحجز وسيقوم كادر M. Padel بالتواصل معك مباشرة عبر الواتساب لتأكيد الحجز.
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()">حسناً، فهمت</button>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
     
-    // قائمة الأوقات مفصولة لضمان الترتيب المثالي
-    const SLOTS_DATA = [
-      { start: "06:00 م", end: "07:00 م" },
-      { start: "07:00 م", end: "08:00 م" },
-      { start: "08:00 م", end: "09:00 م" },
-      { start: "09:00 م", end: "10:00 م" },
-      { start: "10:00 م", end: "11:00 م" },
-      { start: "11:00 م", end: "12:00 ص" },
-      { start: "12:00 ص", end: "01:00 ص" },
-      { start: "01:00 ص", end: "02:00 ص" }
+    const SLOTS_CONFIG = [
+      { id: 0, text: "06:00 م - 07:00 م", t1: "06:00 م", t2: "07:00 م", startHour: 18 },
+      { id: 1, text: "07:00 م - 08:00 م", t1: "07:00 م", t2: "08:00 م", startHour: 19 },
+      { id: 2, text: "08:00 م - 09:00 م", t1: "08:00 م", t2: "09:00 م", startHour: 20 },
+      { id: 3, text: "09:00 م - 10:00 م", t1: "09:00 م", t2: "10:00 م", startHour: 21 },
+      { id: 4, text: "10:00 م - 11:00 م", t1: "10:00 م", t2: "11:00 م", startHour: 22 },
+      { id: 5, text: "11:00 م - 12:00 ص", t1: "11:00 م", t2: "12:00 ص", startHour: 23 },
+      { id: 6, text: "12:00 ص - 01:00 ص", t1: "12:00 ص", t2: "01:00 ص", startHour: 24 },
+      { id: 7, text: "01:00 ص - 02:00 ص", t1: "01:00 ص", t2: "02:00 ص", startHour: 25 }
     ];
 
     let selectedDate = "";
-    let selectedSlots = [];
+    let isTodayDate = true;
+    let selectedIndices = [];
     let bookedSlots = [];
 
     const daysList = document.getElementById("daysList");
@@ -381,6 +473,13 @@
     const custPhone = document.getElementById("custPhone");
     const priceDisplay = document.getElementById("priceDisplay");
     const submitBtn = document.getElementById("submitBooking");
+    const successModal = document.getElementById("successModal");
+
+    function triggerHaptic() {
+      if ("vibrate" in navigator) {
+        navigator.vibrate(50);
+      }
+    }
 
     function initDays() {
       const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
@@ -399,19 +498,23 @@
           <div class="day-name">${dayTitle}</div>
           <div class="day-num">${d.getDate()}/${d.getMonth() + 1}</div>
         `;
-        chip.onclick = () => selectDate(dateStr, chip);
+        chip.onclick = () => selectDate(dateStr, i === 0, chip);
         daysList.appendChild(chip);
 
-        if (i === 0) selectedDate = dateStr;
+        if (i === 0) {
+          selectedDate = dateStr;
+          isTodayDate = true;
+        }
       }
       fetchBookedSlots();
     }
 
-    function selectDate(dateStr, element) {
+    function selectDate(dateStr, isToday, element) {
       document.querySelectorAll(".day-chip").forEach(c => c.classList.remove("active"));
       element.classList.add("active");
       selectedDate = dateStr;
-      selectedSlots = [];
+      isTodayDate = isToday;
+      selectedIndices = [];
       updateUI();
       fetchBookedSlots();
     }
@@ -427,38 +530,79 @@
       renderSlots();
     }
 
+    function isSlotExpired(slotHour) {
+      if (!isTodayDate) return false;
+      const now = new Date();
+      let currentHour = now.getHours();
+      if (currentHour < 6) currentHour += 24; // فترات ما بعد منتصف الليل
+      return currentHour >= slotHour;
+    }
+
     function renderSlots() {
       slotsGrid.innerHTML = "";
-      SLOTS_DATA.forEach(slotObj => {
-        const slotString = `${slotObj.start} - ${slotObj.end}`;
-        const isBooked = bookedSlots.includes(slotString);
-        const isSelected = selectedSlots.includes(slotString);
+
+      SLOTS_CONFIG.forEach(slot => {
+        const isBooked = bookedSlots.includes(slot.text);
+        const expired = isSlotExpired(slot.startHour);
+        const isSelected = selectedIndices.includes(slot.id);
 
         const div = document.createElement("div");
-        div.className = `slot-btn ${isBooked ? "booked" : ""} ${isSelected ? "selected" : ""}`;
+        let statusClass = "";
+        let statusText = "متاح";
+
+        if (isBooked) {
+          statusClass = "booked";
+          statusText = "محجوز";
+        } else if (expired) {
+          statusClass = "expired";
+          statusText = "منتهية";
+        } else if (isSelected) {
+          statusClass = "selected";
+          statusText = "تم التحديد";
+        }
+
+        div.className = `slot-btn ${statusClass}`;
         
         div.innerHTML = `
           <div class="slot-time-box">
-            <span>${slotObj.start}</span>
+            <bdi>${slot.t1}</bdi>
             <span>-</span>
-            <span>${slotObj.end}</span>
+            <bdi>${slot.t2}</bdi>
           </div>
-          <span class="slot-status">${isBooked ? "محجوز" : (isSelected ? "تم التحديد" : "متاح")}</span>
+          <span class="slot-status">${statusText}</span>
         `;
 
-        if (!isBooked) {
-          div.onclick = () => toggleSlot(slotString);
-        }
+        div.onclick = () => {
+          if (isBooked || expired) {
+            triggerHaptic();
+            div.classList.remove("shake-anim");
+            void div.offsetWidth;
+            div.classList.add("shake-anim");
+          } else {
+            handleSlotSelection(slot.id);
+          }
+        };
+
         slotsGrid.appendChild(div);
       });
       updateUI();
     }
 
-    function toggleSlot(slot) {
-      if (selectedSlots.includes(slot)) {
-        selectedSlots = selectedSlots.filter(s => s !== slot);
+    function handleSlotSelection(id) {
+      if (selectedIndices.includes(id)) {
+        selectedIndices = selectedIndices.filter(i => i !== id);
       } else {
-        selectedSlots.push(slot);
+        if (selectedIndices.length === 0) {
+          selectedIndices.push(id);
+        } else {
+          const min = Math.min(...selectedIndices);
+          const max = Math.max(...selectedIndices);
+          if (id === min - 1 || id === max + 1) {
+            selectedIndices.push(id);
+          } else {
+            selectedIndices = [id]; // إذا لم تكن متتالية يبدأ تحديد جديد
+          }
+        }
       }
       renderSlots();
     }
@@ -471,7 +615,7 @@
     custName.addEventListener("input", updateUI);
 
     function updateUI() {
-      const hoursCount = selectedSlots.length;
+      const hoursCount = selectedIndices.length;
       const priceTotal = (hoursCount * 20000).toLocaleString("en-US");
 
       if (hoursCount > 0) {
@@ -500,26 +644,32 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML = "جاري إرسال الحجز...";
 
-      for (let slot of selectedSlots) {
+      selectedIndices.sort((a, b) => a - b);
+      for (let id of selectedIndices) {
+        const slotText = SLOTS_CONFIG.find(s => s.id === id).text;
         await fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             date: selectedDate,
-            slot: slot,
+            slot: slotText,
             name: custName.value.trim(),
             phone: custPhone.value.trim()
           })
         });
       }
 
-      alert("تم استلام حجزك بنجاح! سيتم التواصل معك عبر الواتساب لتأكيد الحجز.");
-      selectedSlots = [];
+      successModal.style.display = "flex";
+      selectedIndices = [];
       custName.value = "";
       custPhone.value = "";
       fetchBookedSlots();
     };
+
+    function closeModal() {
+      successModal.style.display = "none";
+    }
 
     initDays();
   </script>
