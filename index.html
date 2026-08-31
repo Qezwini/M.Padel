@@ -9,15 +9,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: radial-gradient(circle at top, #132742 0%, #080e18 100%);
-      --card-bg: rgba(18, 30, 49, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
+      --bg-base: #060b14;
+      --glass-bg: rgba(16, 28, 48, 0.55);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-highlight: rgba(255, 255, 255, 0.05);
       --primary: #00ff87;
       --primary-glow: rgba(0, 255, 135, 0.35);
       --text-main: #ffffff;
       --text-muted: #94a3b8;
       --slot-bg: rgba(255, 255, 255, 0.04);
-      --slot-border: rgba(255, 255, 255, 0.07);
+      --slot-border: rgba(255, 255, 255, 0.08);
       --booked-bg: rgba(239, 68, 68, 0.08);
       --booked-border: rgba(239, 68, 68, 0.25);
       --booked-text: #ef4444;
@@ -35,7 +36,11 @@
     }
 
     body {
-      background: var(--bg-gradient);
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(0, 255, 135, 0.12) 0px, transparent 50%),
+        radial-gradient(at 90% 85%, rgba(20, 110, 245, 0.18) 0px, transparent 55%),
+        radial-gradient(circle at 50% 50%, #0d1a2d 0%, #050911 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
@@ -45,15 +50,16 @@
     }
 
     .booking-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--glass-border);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 30px;
       width: 100%;
       max-width: 440px;
       padding: 28px 20px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       position: relative;
     }
 
@@ -64,6 +70,7 @@
       letter-spacing: 1.5px;
       margin-bottom: 24px;
       color: #fff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .section-label {
@@ -90,6 +97,8 @@
       flex: 0 0 74px;
       padding: 12px 0;
       background: var(--slot-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--slot-border);
       border-radius: 18px;
       text-align: center;
@@ -109,7 +118,7 @@
     .day-chip.active {
       background: var(--primary);
       border-color: var(--primary);
-      box-shadow: 0 0 16px var(--primary-glow);
+      box-shadow: 0 0 18px var(--primary-glow);
     }
     .day-chip.active .day-name,
     .day-chip.active .day-num {
@@ -129,6 +138,8 @@
 
     .slot-btn {
       background: var(--slot-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--slot-border);
       border-radius: 16px;
       padding: 12px 6px;
@@ -163,7 +174,7 @@
     .slot-btn.selected {
       background: rgba(0, 255, 135, 0.18);
       border-color: var(--primary);
-      box-shadow: 0 0 14px rgba(0, 255, 135, 0.3);
+      box-shadow: 0 0 16px rgba(0, 255, 135, 0.35);
     }
 
     .slot-btn.booked {
@@ -207,33 +218,44 @@
     }
     .input-group input {
       width: 100%;
-      background: var(--slot-bg);
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--slot-border);
       border-radius: 16px;
       padding: 14px 16px;
       color: #fff;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .input-group input:focus {
       border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
     }
 
+    .price-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
     .price-tag {
       display: none;
       text-align: center;
-      font-size: 15px;
-      font-weight: 900;
+      font-size: 14px;
+      font-weight: 800;
       color: var(--primary);
-      margin-bottom: 14px;
-      padding: 10px;
-      border-radius: 14px;
+      padding: 8px 18px;
+      border-radius: 20px;
       background: rgba(0, 255, 135, 0.08);
-      border: 1px solid rgba(0, 255, 135, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 255, 135, 0.2);
+      width: fit-content;
     }
 
     .submit-btn {
+      position: relative;
       width: 100%;
       background: var(--primary);
       color: #05140d;
@@ -243,29 +265,33 @@
       font-size: 16px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 8px 20px var(--primary-glow);
+      box-shadow: 0 8px 22px var(--primary-glow);
       transition: all 0.2s ease;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
     }
     .submit-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
-    .spinner {
-      display: none;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(5, 20, 13, 0.2);
-      border-top-color: #05140d;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .btn-progress-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 0%;
+      background: rgba(0, 0, 0, 0.18);
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    .btn-content {
+      position: relative;
+      z-index: 2;
     }
 
     .footer-section {
@@ -287,14 +313,16 @@
       font-size: 13px;
       font-weight: 600;
       background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       padding: 12px 14px;
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       transition: all 0.2s ease;
     }
     .info-link:hover {
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.18);
       background: rgba(255, 255, 255, 0.06);
     }
 
@@ -321,9 +349,11 @@
       font-size: 13px;
       font-weight: 700;
       background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       padding: 12px;
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       transition: all 0.2s ease;
     }
     .social-btn:hover {
@@ -349,26 +379,29 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 999;
       justify-content: center;
       align-items: center;
       padding: 20px;
     }
     .modal-box {
-      background: #121e31;
-      border: 1px solid var(--primary);
-      box-shadow: 0 0 25px var(--primary-glow);
-      border-radius: 24px;
+      background: rgba(18, 30, 49, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(0, 255, 135, 0.35);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 25px var(--primary-glow);
+      border-radius: 26px;
       padding: 30px 20px;
-      max-width: 380px;
+      max-width: 360px;
       width: 100%;
       text-align: center;
     }
     .modal-icon {
-      font-size: 50px;
-      margin-bottom: 16px;
+      font-size: 48px;
+      margin-bottom: 14px;
       display: block;
     }
     .modal-title {
@@ -381,7 +414,7 @@
       font-size: 14px;
       color: var(--text-muted);
       line-height: 1.6;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
     .modal-close-btn {
       width: 100%;
@@ -417,11 +450,13 @@
       <input type="tel" id="custPhone" placeholder="07XXXXXXXXX" maxlength="11" autocomplete="off">
     </div>
 
-    <div class="price-tag" id="priceDisplay"></div>
+    <div class="price-container">
+      <div class="price-tag" id="priceDisplay"></div>
+    </div>
 
     <button class="submit-btn" id="submitBooking" disabled>
-      <div class="spinner" id="btnSpinner"></div>
-      <span id="btnText">حدد وقتاً للحجز</span>
+      <div class="btn-progress-bar" id="btnProgress"></div>
+      <span class="btn-content" id="btnText">حدد وقتاً للحجز</span>
     </button>
 
     <div class="footer-section">
@@ -487,7 +522,7 @@
     const priceDisplay = document.getElementById("priceDisplay");
     const submitBtn = document.getElementById("submitBooking");
     const btnText = document.getElementById("btnText");
-    const btnSpinner = document.getElementById("btnSpinner");
+    const btnProgress = document.getElementById("btnProgress");
     const successModal = document.getElementById("successModal");
 
     function triggerHaptic() {
@@ -657,7 +692,7 @@
 
     submitBtn.onclick = async () => {
       submitBtn.disabled = true;
-      btnSpinner.style.display = "inline-block";
+      btnProgress.style.width = "85%";
       btnText.innerText = "جاري إرسال الحجز...";
 
       selectedIndices.sort((a, b) => a - b);
@@ -676,12 +711,15 @@
         });
       }
 
-      btnSpinner.style.display = "none";
-      successModal.style.display = "flex";
-      selectedIndices = [];
-      custName.value = "";
-      custPhone.value = "";
-      fetchBookedSlots();
+      btnProgress.style.width = "100%";
+      setTimeout(() => {
+        btnProgress.style.width = "0%";
+        successModal.style.display = "flex";
+        selectedIndices = [];
+        custName.value = "";
+        custPhone.value = "";
+        fetchBookedSlots();
+      }, 400);
     };
 
     function closeModal() {
