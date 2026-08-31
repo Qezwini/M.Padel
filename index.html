@@ -277,20 +277,23 @@
       box-shadow: none;
     }
 
-    .btn-progress-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 100%;
-      width: 0%;
-      background: rgba(0, 0, 0, 0.2);
-      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.15);
-      z-index: 1;
+    .submit-btn.loading {
+      background: linear-gradient(
+        90deg,
+        #00ff87 0%,
+        #00e67a 25%,
+        #70ffba 50%,
+        #00e67a 75%,
+        #00ff87 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite linear;
+      box-shadow: 0 0 25px var(--primary-glow);
     }
 
-    .btn-content {
-      position: relative;
-      z-index: 2;
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     .footer-section {
@@ -454,8 +457,7 @@
     </div>
 
     <button class="submit-btn" id="submitBooking" disabled>
-      <div class="btn-progress-bar" id="btnProgress"></div>
-      <span class="btn-content" id="btnText">حدد وقتاً للحجز</span>
+      <span id="btnText">حدد وقتاً للحجز</span>
     </button>
 
     <div class="footer-section">
@@ -521,7 +523,6 @@
     const priceDisplay = document.getElementById("priceDisplay");
     const submitBtn = document.getElementById("submitBooking");
     const btnText = document.getElementById("btnText");
-    const btnProgress = document.getElementById("btnProgress");
     const successModal = document.getElementById("successModal");
 
     function triggerHaptic() {
@@ -691,18 +692,8 @@
 
     submitBtn.onclick = async () => {
       submitBtn.disabled = true;
+      submitBtn.classList.add("loading");
       btnText.innerText = "جاري إرسال الحجز...";
-
-      let progress = 0;
-      btnProgress.style.transition = "none";
-      btnProgress.style.width = "0%";
-
-      const progressInterval = setInterval(() => {
-        if (progress < 90) {
-          progress += Math.random() * 3 + 1;
-          btnProgress.style.width = `${progress}%`;
-        }
-      }, 50);
 
       selectedIndices.sort((a, b) => a - b);
       for (let id of selectedIndices) {
@@ -720,19 +711,12 @@
         });
       }
 
-      clearInterval(progressInterval);
-      btnProgress.style.transition = "width 0.25s linear";
-      btnProgress.style.width = "100%";
-
-      setTimeout(() => {
-        btnProgress.style.transition = "none";
-        btnProgress.style.width = "0%";
-        successModal.style.display = "flex";
-        selectedIndices = [];
-        custName.value = "";
-        custPhone.value = "";
-        fetchBookedSlots();
-      }, 260);
+      submitBtn.classList.remove("loading");
+      successModal.style.display = "flex";
+      selectedIndices = [];
+      custName.value = "";
+      custPhone.value = "";
+      fetchBookedSlots();
     };
 
     function closeModal() {
