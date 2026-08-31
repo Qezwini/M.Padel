@@ -133,15 +133,22 @@
       transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
     }
-    .slot-btn .slot-time {
+    
+    .slot-btn .slot-time-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      direction: ltr !important;
       font-size: 13px;
       font-weight: 700;
       color: #fff;
-      direction: ltr;
-      unicode-bidi: isolate;
     }
+
     .slot-btn .slot-status {
       font-size: 11px;
       font-weight: 600;
@@ -160,7 +167,7 @@
       cursor: not-allowed;
       opacity: 0.55;
     }
-    .slot-btn.booked .slot-time {
+    .slot-btn.booked .slot-time-box {
       color: #64748b;
       text-decoration: line-through;
     }
@@ -250,8 +257,13 @@
       border-color: rgba(255, 255, 255, 0.15);
       background: rgba(255, 255, 255, 0.06);
     }
-    .info-link span.icon {
-      font-size: 16px;
+
+    .social-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
     .social-row {
@@ -320,9 +332,11 @@
 
     <div class="footer-section">
       <a href="https://maps.app.goo.gl/Tv4WXvaq5y5mmBQt8" target="_blank" class="info-link">
-        <span class="icon">📍</span>
+        <span>📍</span>
         <span>النجف الأشرف - قرية الغدير الأولى، شارع السنتر</span>
       </a>
+
+      <div class="social-label">للتواصل والاستفسار المباشر:</div>
 
       <div class="social-row">
         <a href="https://instagram.com/m.padel1" target="_blank" class="social-btn instagram">
@@ -345,15 +359,16 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
     
-    const SLOTS = [
-      "06:00 م - 07:00 م",
-      "07:00 م - 08:00 م",
-      "08:00 م - 09:00 م",
-      "09:00 م - 10:00 م",
-      "10:00 م - 11:00 م",
-      "11:00 م - 12:00 ص",
-      "12:00 ص - 01:00 ص",
-      "01:00 ص - 02:00 ص"
+    // قائمة الأوقات مفصولة لضمان الترتيب المثالي
+    const SLOTS_DATA = [
+      { start: "06:00 م", end: "07:00 م" },
+      { start: "07:00 م", end: "08:00 م" },
+      { start: "08:00 م", end: "09:00 م" },
+      { start: "09:00 م", end: "10:00 م" },
+      { start: "10:00 م", end: "11:00 م" },
+      { start: "11:00 م", end: "12:00 ص" },
+      { start: "12:00 ص", end: "01:00 ص" },
+      { start: "01:00 ص", end: "02:00 ص" }
     ];
 
     let selectedDate = "";
@@ -414,17 +429,25 @@
 
     function renderSlots() {
       slotsGrid.innerHTML = "";
-      SLOTS.forEach(slot => {
-        const isBooked = bookedSlots.includes(slot);
-        const isSelected = selectedSlots.includes(slot);
+      SLOTS_DATA.forEach(slotObj => {
+        const slotString = `${slotObj.start} - ${slotObj.end}`;
+        const isBooked = bookedSlots.includes(slotString);
+        const isSelected = selectedSlots.includes(slotString);
+
         const div = document.createElement("div");
         div.className = `slot-btn ${isBooked ? "booked" : ""} ${isSelected ? "selected" : ""}`;
+        
         div.innerHTML = `
-          <span class="slot-time">${slot}</span>
+          <div class="slot-time-box">
+            <span>${slotObj.start}</span>
+            <span>-</span>
+            <span>${slotObj.end}</span>
+          </div>
           <span class="slot-status">${isBooked ? "محجوز" : (isSelected ? "تم التحديد" : "متاح")}</span>
         `;
+
         if (!isBooked) {
-          div.onclick = () => toggleSlot(slot);
+          div.onclick = () => toggleSlot(slotString);
         }
         slotsGrid.appendChild(div);
       });
