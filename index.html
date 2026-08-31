@@ -147,9 +147,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      direction: ltr !important;
-      unicode-bidi: bidi-override;
+      gap: 5px;
+      direction: rtl !important;
       font-size: 13px;
       font-weight: 700;
       color: #fff;
@@ -249,11 +248,24 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
     .submit-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(5, 20, 13, 0.2);
+      border-top-color: #05140d;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .footer-section {
@@ -397,18 +409,19 @@
 
     <div class="input-group">
       <span class="section-label">الاسم الكامل</span>
-      <input type="text" id="custName" placeholder="اكتب اسمك الثنائي أو الثلاثي">
+      <input type="text" id="custName" placeholder="اكتب اسمك الثنائي أو الثلاثي" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
 
     <div class="input-group">
       <span class="section-label">رقم الهاتف (واتساب)</span>
-      <input type="tel" id="custPhone" placeholder="07XXXXXXXXX" maxlength="11">
+      <input type="tel" id="custPhone" placeholder="07XXXXXXXXX" maxlength="11" autocomplete="off">
     </div>
 
     <div class="price-tag" id="priceDisplay"></div>
 
     <button class="submit-btn" id="submitBooking" disabled>
-      <span>حدد وقتاً للحجز</span>
+      <div class="spinner" id="btnSpinner"></div>
+      <span id="btnText">حدد وقتاً للحجز</span>
     </button>
 
     <div class="footer-section">
@@ -442,7 +455,7 @@
       <span class="modal-icon">✅</span>
       <div class="modal-title">تم استلام طلبك بنجاح</div>
       <div class="modal-desc">
-        شكراً لك! تم تثبيت طلب الحجز وسيقوم كادر M. Padel بالتواصل معك مباشرة عبر الواتساب لتأكيد الحجز.
+        سيتم التواصل معك عبر الواتساب لتأكيد الحجز.
       </div>
       <button class="modal-close-btn" onclick="closeModal()">حسناً، فهمت</button>
     </div>
@@ -452,14 +465,14 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
     
     const SLOTS_CONFIG = [
-      { id: 0, text: "06:00 م - 07:00 م", t1: "06:00 م", t2: "07:00 م", startHour: 18 },
-      { id: 1, text: "07:00 م - 08:00 م", t1: "07:00 م", t2: "08:00 م", startHour: 19 },
-      { id: 2, text: "08:00 م - 09:00 م", t1: "08:00 م", t2: "09:00 م", startHour: 20 },
-      { id: 3, text: "09:00 م - 10:00 م", t1: "09:00 م", t2: "10:00 م", startHour: 21 },
-      { id: 4, text: "10:00 م - 11:00 م", t1: "10:00 م", t2: "11:00 م", startHour: 22 },
-      { id: 5, text: "11:00 م - 12:00 ص", t1: "11:00 م", t2: "12:00 ص", startHour: 23 },
-      { id: 6, text: "12:00 ص - 01:00 ص", t1: "12:00 ص", t2: "01:00 ص", startHour: 24 },
-      { id: 7, text: "01:00 ص - 02:00 ص", t1: "01:00 ص", t2: "02:00 ص", startHour: 25 }
+      { id: 0, text: "06:00 م - 07:00 م", tStart: "06:00 م", tEnd: "07:00 م", startHour: 18 },
+      { id: 1, text: "07:00 م - 08:00 م", tStart: "07:00 م", tEnd: "08:00 م", startHour: 19 },
+      { id: 2, text: "08:00 م - 09:00 م", tStart: "08:00 م", tEnd: "09:00 م", startHour: 20 },
+      { id: 3, text: "09:00 م - 10:00 م", tStart: "09:00 م", tEnd: "10:00 م", startHour: 21 },
+      { id: 4, text: "10:00 م - 11:00 م", tStart: "10:00 م", tEnd: "11:00 م", startHour: 22 },
+      { id: 5, text: "11:00 م - 12:00 ص", tStart: "11:00 م", tEnd: "12:00 ص", startHour: 23 },
+      { id: 6, text: "12:00 ص - 01:00 ص", tStart: "12:00 ص", tEnd: "01:00 ص", startHour: 24 },
+      { id: 7, text: "01:00 ص - 02:00 ص", tStart: "01:00 ص", tEnd: "02:00 ص", startHour: 25 }
     ];
 
     let selectedDate = "";
@@ -473,6 +486,8 @@
     const custPhone = document.getElementById("custPhone");
     const priceDisplay = document.getElementById("priceDisplay");
     const submitBtn = document.getElementById("submitBooking");
+    const btnText = document.getElementById("btnText");
+    const btnSpinner = document.getElementById("btnSpinner");
     const successModal = document.getElementById("successModal");
 
     function triggerHaptic() {
@@ -534,7 +549,7 @@
       if (!isTodayDate) return false;
       const now = new Date();
       let currentHour = now.getHours();
-      if (currentHour < 6) currentHour += 24; // فترات ما بعد منتصف الليل
+      if (currentHour < 6) currentHour += 24;
       return currentHour >= slotHour;
     }
 
@@ -565,9 +580,9 @@
         
         div.innerHTML = `
           <div class="slot-time-box">
-            <bdi>${slot.t1}</bdi>
+            <span>${slot.tStart}</span>
             <span>-</span>
-            <bdi>${slot.t2}</bdi>
+            <span>${slot.tEnd}</span>
           </div>
           <span class="slot-status">${statusText}</span>
         `;
@@ -600,7 +615,7 @@
           if (id === min - 1 || id === max + 1) {
             selectedIndices.push(id);
           } else {
-            selectedIndices = [id]; // إذا لم تكن متتالية يبدأ تحديد جديد
+            selectedIndices = [id];
           }
         }
       }
@@ -627,22 +642,23 @@
 
       const trimmedName = custName.value.trim();
       const hasTwoWords = trimmedName.split(/\s+/).filter(w => w.length > 0).length >= 2;
-      const isPhoneValid = /^07[0-9]{9,10}$/.test(custPhone.value.trim());
+      const isPhoneValid = /^07[0-9]{9}$/.test(custPhone.value.trim());
 
       if (hoursCount > 0 && hasTwoWords && isPhoneValid) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `تأكيد حجز (${hoursCount} ${hoursCount === 1 ? 'ساعة' : hoursCount === 2 ? 'ساعتين' : 'ساعات'})`;
+        btnText.innerText = `تأكيد حجز (${hoursCount} ${hoursCount === 1 ? 'ساعة' : hoursCount === 2 ? 'ساعتين' : 'ساعات'})`;
       } else {
         submitBtn.disabled = true;
-        if (hoursCount === 0) submitBtn.innerHTML = "حدد وقتاً للحجز";
-        else if (!hasTwoWords) submitBtn.innerHTML = "يرجى كتابة الاسم ثنائياً على الأقل";
-        else if (!isPhoneValid) submitBtn.innerHTML = "أدخل رقم هاتف صحيح يبدأ بـ 07";
+        if (hoursCount === 0) btnText.innerText = "حدد وقتاً للحجز";
+        else if (!hasTwoWords) btnText.innerText = "يرجى كتابة الاسم ثنائياً على الأقل";
+        else if (!isPhoneValid) btnText.innerText = "أدخل رقم هاتف صحيح يبدأ بـ 07 من 11 رقم";
       }
     }
 
     submitBtn.onclick = async () => {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = "جاري إرسال الحجز...";
+      btnSpinner.style.display = "inline-block";
+      btnText.innerText = "جاري إرسال الحجز...";
 
       selectedIndices.sort((a, b) => a - b);
       for (let id of selectedIndices) {
@@ -660,6 +676,7 @@
         });
       }
 
+      btnSpinner.style.display = "none";
       successModal.style.display = "flex";
       selectedIndices = [];
       custName.value = "";
@@ -670,6 +687,12 @@
     function closeModal() {
       successModal.style.display = "none";
     }
+
+    successModal.onclick = (e) => {
+      if (e.target === successModal) {
+        closeModal();
+      }
+    };
 
     initDays();
   </script>
