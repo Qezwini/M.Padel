@@ -12,7 +12,6 @@
       --bg-base: #060b14;
       --glass-bg: rgba(16, 28, 48, 0.55);
       --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-highlight: rgba(255, 255, 255, 0.05);
       --primary: #00ff87;
       --primary-glow: rgba(0, 255, 135, 0.35);
       --text-main: #ffffff;
@@ -284,8 +283,8 @@
       right: 0;
       height: 100%;
       width: 0%;
-      background: rgba(0, 0, 0, 0.18);
-      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(0, 0, 0, 0.2);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.15);
       z-index: 1;
     }
 
@@ -692,8 +691,18 @@
 
     submitBtn.onclick = async () => {
       submitBtn.disabled = true;
-      btnProgress.style.width = "85%";
       btnText.innerText = "جاري إرسال الحجز...";
+
+      let progress = 0;
+      btnProgress.style.transition = "none";
+      btnProgress.style.width = "0%";
+
+      const progressInterval = setInterval(() => {
+        if (progress < 90) {
+          progress += Math.random() * 3 + 1;
+          btnProgress.style.width = `${progress}%`;
+        }
+      }, 50);
 
       selectedIndices.sort((a, b) => a - b);
       for (let id of selectedIndices) {
@@ -711,15 +720,19 @@
         });
       }
 
+      clearInterval(progressInterval);
+      btnProgress.style.transition = "width 0.25s linear";
       btnProgress.style.width = "100%";
+
       setTimeout(() => {
+        btnProgress.style.transition = "none";
         btnProgress.style.width = "0%";
         successModal.style.display = "flex";
         selectedIndices = [];
         custName.value = "";
         custPhone.value = "";
         fetchBookedSlots();
-      }, 400);
+      }, 260);
     };
 
     function closeModal() {
