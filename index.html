@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>M. PADEL | حجز الملاعب</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -18,7 +18,6 @@
       --text-muted: #94a3b8;
       --slot-bg: rgba(255, 255, 255, 0.04);
       --slot-border: rgba(255, 255, 255, 0.07);
-      --slot-hover: rgba(0, 255, 135, 0.12);
       --booked-bg: rgba(239, 68, 68, 0.08);
       --booked-border: rgba(239, 68, 68, 0.2);
       --booked-text: #ef4444;
@@ -38,7 +37,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px 12px;
+      padding: 24px 14px;
       color: var(--text-main);
     }
 
@@ -58,7 +57,7 @@
       text-align: center;
       font-size: 32px;
       font-weight: 900;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       margin-bottom: 24px;
       color: #fff;
     }
@@ -67,16 +66,16 @@
       font-size: 13px;
       font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: block;
     }
 
     .days-scroll {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 20px;
+      padding: 4px 2px 14px 2px;
+      margin-bottom: 18px;
       scrollbar-width: none;
     }
     .days-scroll::-webkit-scrollbar {
@@ -84,11 +83,11 @@
     }
 
     .day-chip {
-      flex: 0 0 72px;
-      padding: 10px 0;
+      flex: 0 0 74px;
+      padding: 12px 0;
       background: var(--slot-bg);
       border: 1px solid var(--slot-border);
-      border-radius: 16px;
+      border-radius: 18px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -106,7 +105,7 @@
     .day-chip.active {
       background: var(--primary);
       border-color: var(--primary);
-      box-shadow: 0 0 15px var(--primary-glow);
+      box-shadow: 0 0 16px var(--primary-glow);
     }
     .day-chip.active .day-name,
     .day-chip.active .day-num {
@@ -134,31 +133,32 @@
       transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
     .slot-btn .slot-time {
       font-size: 13px;
       font-weight: 700;
       color: #fff;
       direction: ltr;
+      unicode-bidi: isolate;
     }
     .slot-btn .slot-status {
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--primary);
     }
 
     .slot-btn.selected {
-      background: rgba(0, 255, 135, 0.15);
+      background: rgba(0, 255, 135, 0.18);
       border-color: var(--primary);
-      box-shadow: 0 0 12px rgba(0, 255, 135, 0.25);
+      box-shadow: 0 0 14px rgba(0, 255, 135, 0.3);
     }
 
     .slot-btn.booked {
       background: var(--booked-bg);
       border-color: var(--booked-border);
       cursor: not-allowed;
-      opacity: 0.6;
+      opacity: 0.55;
     }
     .slot-btn.booked .slot-time {
       color: #64748b;
@@ -193,9 +193,10 @@
       font-weight: 900;
       color: var(--primary);
       margin-bottom: 14px;
-      padding: 8px;
-      border-radius: 12px;
+      padding: 10px;
+      border-radius: 14px;
       background: rgba(0, 255, 135, 0.08);
+      border: 1px solid rgba(0, 255, 135, 0.15);
     }
 
     .submit-btn {
@@ -219,6 +220,39 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    .footer-section {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
+    }
+    .info-link:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .info-link span.icon {
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -229,12 +263,12 @@
     <span class="section-label">اختر يوم الحجز</span>
     <div class="days-scroll" id="daysList"></div>
 
-    <span class="section-label">الأوقات المتاحة (يمكنك تحديد حتى ساعتين)</span>
+    <span class="section-label">الأوقات المتاحة (يمكنك تحديد عدة ساعات)</span>
     <div class="slots-grid" id="slotsGrid"></div>
 
     <div class="input-group">
-      <span class="section-label">الاسم الثلاثي</span>
-      <input type="text" id="custName" placeholder="اكتب اسمك الكامل">
+      <span class="section-label">الاسم الكامل</span>
+      <input type="text" id="custName" placeholder="اكتب اسمك الثنائي أو الثلاثي">
     </div>
 
     <div class="input-group">
@@ -247,10 +281,23 @@
     <button class="submit-btn" id="submitBooking" disabled>
       <span>حدد وقتاً للحجز</span>
     </button>
+
+    <div class="footer-section">
+      <a href="https://maps.app.goo.gl/Tv4WXvaq5y5mmBQt8" target="_blank" class="info-link">
+        <span class="icon">📍</span>
+        <span>النجف الأشرف - قرية الغدير الأولى (شارع السنتر)</span>
+      </a>
+
+      <a href="https://wa.me/9647831104365" target="_blank" class="info-link">
+        <span class="icon">💬</span>
+        <span>تواصل معنا عبر الواتساب (07831104365)</span>
+      </a>
+    </div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec"; // الرابط البرمجي
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
+    
     const SLOTS = [
       "06:00 م - 07:00 م",
       "07:00 م - 08:00 م",
@@ -273,7 +320,6 @@
     const priceDisplay = document.getElementById("priceDisplay");
     const submitBtn = document.getElementById("submitBooking");
 
-    // توليد شريط 7 أيام من تاريخ اليوم
     function initDays() {
       const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
       const now = new Date();
@@ -342,15 +388,11 @@
       if (selectedSlots.includes(slot)) {
         selectedSlots = selectedSlots.filter(s => s !== slot);
       } else {
-        if (selectedSlots.length >= 2) {
-          selectedSlots.shift(); // إبقاء ساعتين كحد أقصى
-        }
         selectedSlots.push(slot);
       }
       renderSlots();
     }
 
-    // فلترة رقم الهاتف لمنع كتابة الحروف نهائياً
     custPhone.addEventListener("input", (e) => {
       e.target.value = e.target.value.replace(/[^0-9]/g, '');
       updateUI();
@@ -360,27 +402,26 @@
 
     function updateUI() {
       const hoursCount = selectedSlots.length;
+      const priceTotal = (hoursCount * 20000).toLocaleString("en-US");
 
-      if (hoursCount === 1) {
+      if (hoursCount > 0) {
         priceDisplay.style.display = "block";
-        priceDisplay.innerText = "المبلغ: 20,000 د.ع / ساعة";
-      } else if (hoursCount === 2) {
-        priceDisplay.style.display = "block";
-        priceDisplay.innerText = "المبلغ: 40,000 د.ع / ساعتين";
+        priceDisplay.innerText = `المبلغ الإجمالي: ${priceTotal} د.ع (${hoursCount} ${hoursCount === 1 ? 'ساعة' : hoursCount === 2 ? 'ساعتين' : 'ساعات'})`;
       } else {
         priceDisplay.style.display = "none";
       }
 
+      const trimmedName = custName.value.trim();
+      const hasTwoWords = trimmedName.split(/\s+/).filter(w => w.length > 0).length >= 2;
       const isPhoneValid = /^07[0-9]{9,10}$/.test(custPhone.value.trim());
-      const isNameValid = custName.value.trim().length >= 3;
 
-      if (hoursCount > 0 && isNameValid && isPhoneValid) {
+      if (hoursCount > 0 && hasTwoWords && isPhoneValid) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `تأكيد حجز (${hoursCount === 1 ? 'ساعة واحدة' : 'ساعتين'})`;
+        submitBtn.innerHTML = `تأكيد حجز (${hoursCount} ${hoursCount === 1 ? 'ساعة' : hoursCount === 2 ? 'ساعتين' : 'ساعات'})`;
       } else {
         submitBtn.disabled = true;
         if (hoursCount === 0) submitBtn.innerHTML = "حدد وقتاً للحجز";
-        else if (!isNameValid) submitBtn.innerHTML = "اكتب الاسم الكامل";
+        else if (!hasTwoWords) submitBtn.innerHTML = "يرجى كتابة الاسم ثنائياً على الأقل";
         else if (!isPhoneValid) submitBtn.innerHTML = "أدخل رقم هاتف صحيح يبدأ بـ 07";
       }
     }
