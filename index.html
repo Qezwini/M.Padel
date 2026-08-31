@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M. PADEL | حجز الملعب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Tajawal', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 flex justify-center items-center">
+
+  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl my-4">
+    
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <div class="inline-block bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs px-3 py-1 rounded-full mb-2 font-bold tracking-wide">
+        نظام الحجز المباشر
+      </div>
+      <h1 class="text-3xl font-black tracking-tight text-white">M. PADEL</h1>
+      <p class="text-slate-400 text-sm mt-1">النجف الأشرف • 20,000 د.ع / ساعة</p>
+    </div>
+
+    <!-- Date Picker -->
+    <div class="mb-5">
+      <label class="block text-xs font-bold text-slate-300 mb-2">اختر تاريخ الحجز</label>
+      <input type="date" id="bookingDate" class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 transition">
+    </div>
+
+    <!-- Slots Grid -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-bold text-slate-300">الأوقات المتاحة</label>
+        <span id="loading" class="text-xs text-emerald-400 animate-pulse hidden">جاري فحص الحجوزات...</span>
+      </div>
+      
+      <div id="slotsGrid" class="grid grid-cols-2 gap-2.5"></div>
+    </div>
+
+    <!-- Customer Form -->
+    <form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-1.5">الاسم الثلاثي</label>
+        <input type="text" id="custName" required placeholder="اكتب اسمك الكامل" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-1.5">رقم الواتساب للتأكيد</label>
+        <input type="tel" id="custPhone" required placeholder="07XXXXXXXXX" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 transition text-left" dir="ltr">
+      </div>
+
+      <button type="submit" id="submitBtn" disabled class="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 disabled:text-slate-600 text-slate-950 font-bold rounded-xl transition duration-200 shadow-lg shadow-emerald-500/10">
+        اختر وقتاً متاحاً
+      </button>
+    </form>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+      <div class="bg-slate-900 border border-emerald-500/30 p-6 rounded-2xl text-center max-w-sm w-full shadow-2xl">
+        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">✓</div>
+        <h3 class="text-lg font-bold text-white mb-1">تم تثبيت حجزك بنجاح!</h3>
+        <p class="text-slate-400 text-xs mb-4">تم حفظ موعدك وإرسال التنبيه لإدارة الملعب.</p>
+        <button onclick="location.reload()" class="w-full py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition">حجز موعد آخر</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec';
+
+    const slots = [
+      "06:00 م - 07:00 م",
+      "07:00 م - 08:00 م",
+      "08:00 م - 09:00 م",
+      "09:00 م - 10:00 م",
+      "10:00 م - 11:00 م",
+      "11:00 م - 12:00 ص",
+      "12:00 ص - 01:00 ص",
+      "01:00 ص - 02:00 ص"
+    ];
+
+    let selectedSlot = null;
+    const dateInput = document.getElementById('bookingDate');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    dateInput.min = today;
+
+    dateInput.addEventListener('change', fetchSlots);
+    fetchSlots();
+
+    async function fetchSlots() {
+      document.getElementById('loading').classList.remove('hidden');
+      selectedSlot = null;
+      updateBtn();
+      
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getSlots&date=${dateInput.value}`);
+        const booked = await res.json();
+        renderSlots(booked);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        document.getElementById('loading').classList.add('hidden');
+      }
+    }
+
+    function renderSlots(booked) {
+      const grid = document.getElementById('slotsGrid');
+      grid.innerHTML = '';
+
+      slots.forEach(slot => {
+        const isBooked = booked.includes(slot);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.disabled = isBooked;
+
+        if (isBooked) {
+          btn.className = "p-3 rounded-xl border border-red-500/30 bg-red-950/40 text-red-400 text-xs font-bold cursor-not-allowed opacity-80 flex flex-col items-center justify-center gap-1";
+          btn.innerHTML = `<span>${slot}</span><span class="text-[10px] bg-red-500/20 px-1.5 py-0.5 rounded text-red-300">محجوز</span>`;
+        } else {
+          btn.className = `p-3 rounded-xl border border-slate-700 bg-slate-950 text-slate-200 text-xs font-bold hover:border-emerald-500 transition flex flex-col items-center justify-center gap-1 ${selectedSlot === slot ? '!border-emerald-500 !bg-emerald-500/10 !text-emerald-400' : ''}`;
+          btn.innerHTML = `<span>${slot}</span><span class="text-[10px] text-emerald-400">متاح</span>`;
+          btn.onclick = () => {
+            selectedSlot = slot;
+            renderSlots(booked);
+            updateBtn();
+          };
+        }
+        grid.appendChild(btn);
+      });
+    }
+
+    function updateBtn() {
+      const btn = document.getElementById('submitBtn');
+      if (selectedSlot) {
+        btn.disabled = false;
+        btn.innerText = `تأكيد حجز وقت (${selectedSlot})`;
+      } else {
+        btn.disabled = true;
+        btn.innerText = 'اختر وقتاً متاحاً';
+      }
+    }
+
+    async function handleBooking(e) {
+      e.preventDefault();
+      if (!selectedSlot) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = 'جاري تسجيل الحجز...';
+
+      const payload = {
+        date: dateInput.value,
+        slot: selectedSlot,
+        name: document.getElementById('custName').value,
+        phone: document.getElementById('custPhone').value
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          document.getElementById('successModal').classList.remove('hidden');
+        } else {
+          alert(result.message);
+          fetchSlots();
+        }
+      } catch (err) {
+        alert("حدث خطأ أثناء الاتصال، يرجى المحاولة لاحقاً");
+        fetchSlots();
+      }
+    }
+  </script>
+</body>
+</html>
