@@ -581,12 +581,22 @@
     }
 
     function isSlotExpired(slotHour) {
-      if (!isTodayDate) return false;
-      const now = new Date();
-      let currentHour = now.getHours();
-      if (currentHour < 6) currentHour += 24;
-      return currentHour >= slotHour;
-    }
+  if (!isTodayDate) return false;
+  const now = new Date();
+  let currentHour = now.getHours();
+
+  // فقط الساعات (12 ص، 1 ص، 2 ص) هي التي تُعتبر امتداداً لسهرة اليوم السابق
+  if (currentHour >= 0 && currentHour < 3) {
+    currentHour += 24;
+  }
+
+  // إذا كانت الساعة من 3 صباحاً حتى قبل المغرب، اليوم لم يبدأ بعد ولا يوجد أي وقت منتهي
+  if (currentHour < 18) {
+    return false;
+  }
+
+  return currentHour >= slotHour;
+}
 
     function renderSlots() {
       slotsGrid.innerHTML = "";
