@@ -435,8 +435,9 @@
 
   <div class="booking-card">
     <div class="brand-title" style="text-align: center; padding: 20px 0;">
-  <img src="logo.svg" alt="M. PADEL" style="max-width: 300px; width: 100%; height: auto; display: block; margin: 0 auto;">
-</div>
+      <img src="logo.svg" alt="M. PADEL" style="max-width: 300px; width: 100%; height: auto; display: block; margin: 0 auto;">
+    </div>
+    
     <span class="section-label">اختر يوم الحجز</span>
     <div class="days-scroll" id="daysList"></div>
 
@@ -532,6 +533,14 @@
       }
     }
 
+    // استخراج التاريخ المحلي بدقة لمنع ترحيل الأيام بسبب UTC
+    function getLocalDateString(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     function initDays() {
       const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
       const now = new Date();
@@ -540,7 +549,7 @@
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(now.getDate() + i);
-        const dateStr = d.toISOString().split("T")[0];
+        const dateStr = getLocalDateString(d);
         const dayTitle = i === 0 ? "اليوم" : dayNames[d.getDay()];
 
         const chip = document.createElement("div");
@@ -581,29 +590,26 @@
       renderSlots();
     }
 
+    // منطق فحص انتهاء الوقت الصحيح بدون إغلاق أوقات اليوم ليلاً
     function isSlotExpired(slotHour) {
-  if (!isTodayDate) return false;
-  const now = new Date();
-  let currentHour = now.getHours();
+      if (!isTodayDate) return false;
+      const now = new Date();
+      const currentHour = now.getHours();
 
-  // فقط الساعات (12 ص، 1 ص، 2 ص) هي التي تُعتبر امتداداً لسهرة اليوم السابق
-  if (currentHour >= 0 && currentHour < 3) {
-    currentHour += 24;
-  }
+      // قبل الساعة 6 مساءً (18:00)، أوقات اليوم كلها قادمة وغير منتهية
+      if (currentHour < 18) {
+        return false;
+      }
 
-  // إذا كانت الساعة من 3 صباحاً حتى قبل المغرب، اليوم لم يبدأ بعد ولا يوجد أي وقت منتهي
-  if (currentHour < 18) {
-    return false;
-  }
-
-  return currentHour >= slotHour;
-}
+      // بعد الـ 6 مساءً، تُغلق الساعات الماضية تباعاً
+      return currentHour >= slotHour;
+    }
 
     function renderSlots() {
       slotsGrid.innerHTML = "";
 
       SLOTS_CONFIG.forEach(slot => {
-        const isBooked = bookedSlots.includes(slot.text);
+        const isBooked = Array.isArray(bookedSlots) && bookedSlots.includes(slot.text);
         const expired = isSlotExpired(slot.startHour);
         const isSelected = selectedIndices.includes(slot.id);
 
