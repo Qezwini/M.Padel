@@ -533,7 +533,6 @@
       }
     }
 
-    // استخراج التاريخ المحلي بدقة لمنع ترحيل الأيام بسبب UTC
     function getLocalDateString(d) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -590,18 +589,15 @@
       renderSlots();
     }
 
-    // منطق فحص انتهاء الوقت الصحيح بدون إغلاق أوقات اليوم ليلاً
     function isSlotExpired(slotHour) {
       if (!isTodayDate) return false;
       const now = new Date();
       const currentHour = now.getHours();
 
-      // قبل الساعة 6 مساءً (18:00)، أوقات اليوم كلها قادمة وغير منتهية
       if (currentHour < 18) {
         return false;
       }
 
-      // بعد الـ 6 مساءً، تُغلق الساعات الماضية تباعاً
       return currentHour >= slotHour;
     }
 
@@ -707,26 +703,26 @@
       }
     }
 
+    // إرسال جميع الساعات المحددة في طلب شبكي واحد
     submitBtn.onclick = async () => {
       submitBtn.disabled = true;
       submitBtn.classList.add("loading");
       btnText.innerText = "جاري إرسال الحجز...";
 
       selectedIndices.sort((a, b) => a - b);
-      for (let id of selectedIndices) {
-        const slotText = SLOTS_CONFIG.find(s => s.id === id).text;
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date: selectedDate,
-            slot: slotText,
-            name: custName.value.trim(),
-            phone: custPhone.value.trim()
-          })
-        });
-      }
+      const chosenSlots = selectedIndices.map(id => SLOTS_CONFIG.find(s => s.id === id).text);
+
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: selectedDate,
+          slots: chosenSlots,
+          name: custName.value.trim(),
+          phone: custPhone.value.trim()
+        })
+      });
 
       submitBtn.classList.remove("loading");
       successModal.style.display = "flex";
