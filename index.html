@@ -885,7 +885,18 @@
       checkTournamentDays();
     }
 
-    function selectDate(dateStr, isToday, element) {
+   function selectDate(dateStr, isToday, element) {
+      // صمام أمان: إذا كان اليوم هو يوم بطولة، امنع تفعيله أو تغيير لونه بالأخضر نهائياً
+      if (element.classList.contains("tournament-day")) {
+        // فقط اجلب الساعات الخاصة بالبطولة ولا تعتمد التحديد الأخضر
+        selectedDate = dateStr;
+        isTodayDate = isToday;
+        selectedIndices = [];
+        updateUI();
+        fetchBookedSlots(true);
+        return;
+      }
+
       document.querySelectorAll(".day-chip").forEach(c => c.classList.remove("active"));
       element.classList.add("active");
       selectedDate = dateStr;
@@ -894,7 +905,6 @@
       updateUI();
       fetchBookedSlots(true);
     }
-
     function renderSkeletonLoading() {
       slotsGrid.innerHTML = "";
       for (let i = 0; i < 8; i++) {
