@@ -207,29 +207,6 @@
       font-weight: 800;
     }
 
-    /* كرت اليوم إذا كانت هناك بطولة */
-    .day-chip.tournament-day {
-      border-color: var(--tournament-color) !important;
-      background: var(--tournament-bg) !important;
-      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3) !important;
-      opacity: 1 !important;
-      filter: none !important;
-    }
-    .day-chip.tournament-day .day-name {
-      color: var(--tournament-color) !important;
-      font-weight: 800;
-    }
-    .day-chip.tournament-day::after {
-      content: '🏆 بطولة';
-      color: var(--tournament-color) !important;
-      font-size: 9px;
-      font-weight: 900;
-      position: absolute;
-      bottom: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
     .day-chip.active {
       background: rgba(0, 255, 135, 0.18);
       border-color: var(--primary);
@@ -329,7 +306,7 @@
       color: var(--booked-text);
     }
 
-    /* كلاس الساعة أثناء البطولة (أصفر) */
+    /* كلاس ساعات البطولة باللون الأصفر */
     .slot-btn.tournament {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
@@ -752,7 +729,6 @@
     let selectedIndices = [];
     let bookedSlots = [];
     let soldOutDates = [];
-    let tournamentDates = [];
     let isCurrentDayTournament = false;
 
     const daysList = document.getElementById("daysList");
@@ -768,7 +744,7 @@
     window.addEventListener("online", () => {
       offlineBanner.style.display = "none";
       fetchBookedSlots(false);
-      checkSpecialDays();
+      checkSoldOutDays();
     });
     window.addEventListener("offline", () => {
       offlineBanner.style.display = "block";
@@ -813,14 +789,10 @@
       if (savedPhone) custPhone.value = savedPhone;
     }
 
-    async function checkSpecialDays() {
+    async function checkSoldOutDays() {
       try {
-        const [soldRes, tourRes] = await Promise.all([
-          fetch(`${SCRIPT_URL}?action=getSoldOutDays&totalSlots=8`),
-          fetch(`${SCRIPT_URL}?action=getTournaments`)
-        ]);
-        soldOutDates = await soldRes.json();
-        tournamentDates = await tourRes.json();
+        const res = await fetch(`${SCRIPT_URL}?action=getSoldOutDays&totalSlots=8`);
+        soldOutDates = await res.json();
         updateDaysAppearance();
       } catch (e) {}
     }
@@ -828,14 +800,10 @@
     function updateDaysAppearance() {
       document.querySelectorAll(".day-chip").forEach(chip => {
         const dStr = chip.getAttribute("data-date");
-        if (tournamentDates.includes(dStr)) {
-          chip.classList.add("tournament-day");
-          chip.classList.remove("sold-out");
-        } else if (soldOutDates.includes(dStr)) {
+        if (soldOutDates.includes(dStr)) {
           chip.classList.add("sold-out");
-          chip.classList.remove("tournament-day");
         } else {
-          chip.classList.remove("sold-out", "tournament-day");
+          chip.classList.remove("sold-out");
         }
       });
     }
@@ -867,7 +835,7 @@
         }
       }
       fetchBookedSlots(true);
-      checkSpecialDays();
+      checkSoldOutDays();
     }
 
     function selectDate(dateStr, isToday, element) {
@@ -906,7 +874,7 @@
     setInterval(() => {
       if (document.visibilityState === "visible" && navigator.onLine) {
         fetchBookedSlots(false);
-        checkSpecialDays();
+        checkSoldOutDays();
       }
     }, 12000);
 
@@ -1082,7 +1050,7 @@
         document.getElementById("successModal").style.display = "flex";
         selectedIndices = [];
         fetchBookedSlots(false);
-        checkSpecialDays();
+        checkSoldOutDays();
 
       } catch (err) {
         alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة ثانية.");
