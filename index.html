@@ -534,6 +534,16 @@
     const btnText = document.getElementById("btnText");
     const successModal = document.getElementById("successModal");
 
+    // تفعيل التمرير الأفقي للأيام باستخدام عجلة الماوس
+    if (daysList) {
+      daysList.addEventListener("wheel", (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          daysList.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    }
+
     function triggerHaptic() {
       if ("vibrate" in navigator) {
         navigator.vibrate(50);
