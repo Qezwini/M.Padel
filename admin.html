@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>M. PADEL | Admin Dashbord</title>
+  <title>M. PADEL | لوحة التحكم الإدارية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -43,7 +43,6 @@
       color: var(--text-main);
     }
 
-    /* شاشة تسجيل الدخول */
     .login-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -67,12 +66,12 @@
       max-width: 440px;
       padding: 28px 20px;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-      position: relative;
+      margin-bottom: 20px;
     }
 
     .brand-title {
       text-align: center;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 900;
       letter-spacing: 1.5px;
       margin-bottom: 20px;
@@ -102,13 +101,9 @@
       outline: none;
       transition: all 0.2s ease;
     }
-    .input-group input:focus, .input-group select:focus {
+    .input-group input:focus {
       border-color: var(--primary);
       box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
-    }
-    .input-group select option {
-      background: #0d1a2d;
-      color: #fff;
     }
 
     .action-btn {
@@ -117,7 +112,7 @@
       color: #05140d;
       border: none;
       border-radius: 16px;
-      padding: 15px;
+      padding: 14px;
       font-size: 15px;
       font-weight: 900;
       cursor: pointer;
@@ -130,18 +125,11 @@
       box-shadow: 0 8px 22px var(--tournament-glow);
       color: #1a1500;
     }
-    .action-btn:active {
-      transform: scale(0.98);
-    }
 
     .divider {
       height: 1px;
       background: rgba(255, 255, 255, 0.08);
-      margin: 22px 0;
-    }
-
-    .dashboard-container {
-      display: none;
+      margin: 20px 0;
     }
 
     .slots-picker {
@@ -160,7 +148,6 @@
       text-align: center;
       cursor: pointer;
       user-select: none;
-      transition: all 0.2s;
     }
     .slot-checkbox.selected {
       background: rgba(0, 255, 135, 0.15);
@@ -179,11 +166,40 @@
     }
     .alert-box.success { background: rgba(0, 255, 135, 0.1); color: var(--primary); border: 1px solid rgba(0, 255, 135, 0.3); }
     .alert-box.error { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .stats-card {
+      background: rgba(0, 255, 135, 0.06);
+      border: 1px solid rgba(0, 255, 135, 0.2);
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .booking-row-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .delete-booking-btn {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <!-- شاشة حماية كلمة السر -->
+  <!-- شاشة الحماية -->
   <div class="login-overlay" id="loginOverlay">
     <div class="admin-card" style="box-shadow: 0 0 40px rgba(0,255,135,0.15);">
       <div class="brand-title">🔒 لوحة تحكم M. PADEL</div>
@@ -196,20 +212,33 @@
     </div>
   </div>
 
-  <!-- لوحة التحكم الرئيسية -->
-  <div class="admin-card">
+  <!-- لوحة التحكم -->
+  <div class="admin-card" style="max-width: 480px;">
     <div class="brand-title">⚡ M. PADEL Admin</div>
-    
     <div id="alertBox" class="alert-box"></div>
 
-    <!-- 1. قسم إدارة البطولات والأيام -->
-    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 12px;">🏆 إدارة أيام البطولات</div>
-    
-    <div class="input-group">
-      <span class="section-label">اختر التاريخ</span>
-      <input type="date" id="tourDate">
+    <!-- عداد الأرباح اليومية -->
+    <div class="stats-card">
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">دخل اليوم المحدد (المتوقع):</div>
+      <div id="dailyRevenue" style="font-size: 18px; font-weight: 900; color: var(--primary);">0 د.ع (0 ساعات)</div>
     </div>
 
+    <!-- 1. سجل الحجوزات وإدارتها -->
+    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 10px;">📋 سجل حجوزات اليوم المختار</div>
+    <div class="input-group" style="margin-bottom: 10px;">
+      <input type="date" id="viewDate" onchange="loadAdminBookings()">
+    </div>
+    <div id="bookingsListContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 16px;">
+      <div style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;">جاري تحميل الحجوزات...</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 2. إدارة البطولات -->
+    <div style="font-weight: 800; font-size: 14px; color: var(--tournament); margin-bottom: 10px;">🏆 إدارة أيام البطولات</div>
+    <div class="input-group">
+      <input type="date" id="tourDate">
+    </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
       <button class="action-btn tournament-btn" onclick="setTournamentStatus(true)" style="margin:0; font-size:13px; padding:12px;">تفعيل كـ بطولة 🟡</button>
       <button class="action-btn" onclick="setTournamentStatus(false)" style="margin:0; font-size:13px; padding:12px; background:rgba(255,255,255,0.06); color:#fff;">إلغاء البطولة 🟢</button>
@@ -217,33 +246,21 @@
 
     <div class="divider"></div>
 
-    <!-- 2. قسم الحجز اليدوي السريع -->
-    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 12px;">📞 حجز يدوي فوري (لهواتف الزبائن)</div>
-
-    <div class="input-group">
-      <span class="section-label">تاريخ الحجز</span>
-      <input type="date" id="manualDate">
-    </div>
-
-    <div class="input-group">
-      <span class="section-label">اسم الزبون</span>
-      <input type="text" id="manualName" placeholder="الاسم الثنائي">
-    </div>
-
-    <div class="input-group">
-      <span class="section-label">رقم الهاتف</span>
-      <input type="tel" id="manualPhone" placeholder="07XXXXXXXXX" maxlength="11">
-    </div>
-
-    <span class="section-label">اختر الساعات المطلوبة:</span>
+    <!-- 3. الحجز اليدوي الفوري -->
+    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 10px;">📞 حجز يدوي فوري</div>
+    <div class="input-group"><input type="date" id="manualDate"></div>
+    <div class="input-group"><input type="text" id="manualName" placeholder="اسم الزبون الثنائي"></div>
+    <div class="input-group"><input type="tel" id="manualPhone" placeholder="07XXXXXXXXX" maxlength="11"></div>
+    
+    <span class="section-label">الساعات:</span>
     <div class="slots-picker" id="slotsPicker"></div>
 
     <button class="action-btn" onclick="submitManualBooking()" id="manualSubmitBtn">تنفيذ الحجز اليدوي</button>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
-    const ADMIN_PIN = "200607"; // 🔑 تقدر تغير رمز المرور من هنا بسهولة
+    const SCRIPT_URL = "ضع_رابط_السكربت_الخاص_بيك_هنا"; // استبدل هذا الرابط برابط Web App الخاص بك
+    const ADMIN_PIN = "1234"; // رمز المرور الخاص بك
 
     const SLOTS_LIST = [
       "06:00 م - 07:00 م", "07:00 م - 08:00 م",
@@ -268,10 +285,11 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById("tourDate").value = today;
       document.getElementById("manualDate").value = today;
+      document.getElementById("viewDate").value = today;
 
       const picker = document.getElementById("slotsPicker");
       picker.innerHTML = "";
-      SLOTS_LIST.forEach((slot, index) => {
+      SLOTS_LIST.forEach((slot) => {
         const div = document.createElement("div");
         div.className = "slot-checkbox";
         div.innerText = slot;
@@ -286,6 +304,8 @@
         };
         picker.appendChild(div);
       });
+
+      loadAdminBookings();
     }
 
     function showAlert(msg, type = "success") {
@@ -296,11 +316,66 @@
       setTimeout(() => { box.style.display = "none"; }, 4000);
     }
 
+    async function loadAdminBookings() {
+      const date = document.getElementById("viewDate").value;
+      const container = document.getElementById("bookingsListContainer");
+      const revDisplay = document.getElementById("dailyRevenue");
+      
+      container.innerHTML = "<div style='text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;'>جاري التحديث...</div>";
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getAdminBookings&date=${date}`);
+        const bookings = await res.json();
+
+        container.innerHTML = "";
+        let hoursCount = 0;
+
+        if (!bookings || bookings.length === 0) {
+          container.innerHTML = "<div style='text-align: center; color: var(--text-muted); font-size: 12px; padding: 10px;'>لا توجد حجوزات مسجلة في هذا اليوم.</div>";
+          revDisplay.innerText = "0 د.ع (0 ساعات)";
+          return;
+        }
+
+        bookings.forEach(b => {
+          if (!String(b.slot).includes("بطولة")) {
+            hoursCount++;
+          }
+          const item = document.createElement("div");
+          item.className = "booking-row-item";
+          item.innerHTML = `
+            <div>
+              <div style="color: var(--primary); font-weight: 700;">${b.slot}</div>
+              <div style="color: #fff; margin-top: 2px;">${b.name} (${b.phone})</div>
+            </div>
+            <button class="delete-booking-btn" onclick="deleteBooking(${b.rowIndex})">إلغاء</button>
+          `;
+          container.appendChild(item);
+        });
+
+        const totalMoney = (hoursCount * 20000).toLocaleString("en-US");
+        revDisplay.innerText = `${totalMoney} د.ع (${hoursCount} ${hoursCount === 1 ? 'ساعة' : 'ساعات'})`;
+
+      } catch (e) {
+        container.innerHTML = "<div style='text-align: center; color: var(--danger); font-size: 12px; padding: 10px;'>تعذر جلب الحجوزات.</div>";
+      }
+    }
+
+    async function deleteBooking(rowIndex) {
+      if (!confirm("هل أنت متأكد من حذف هذا الحجز وإتاحة الوقت مجدداً؟")) return;
+      try {
+        await fetch(`${SCRIPT_URL}?action=deleteBooking&row=${rowIndex}`);
+        showAlert("🗑️ تم حذف الحجز بنجاح!");
+        loadAdminBookings();
+      } catch (e) {
+        showAlert("فشل حذف الحجز", "error");
+      }
+    }
+
     async function setTournamentStatus(isTournament) {
       const date = document.getElementById("tourDate").value;
       if (!date) return alert("اختر التاريخ أولاً");
 
-      if (!confirm(isTournament ? `هل أنت متأكد من تحويل تاريخ ${date} إلى يوم بطولة؟` : `هل تريد إلغاء حالة البطولة لتاريخ ${date}؟`)) return;
+      if (!confirm(isTournament ? `تحويل تاريخ ${date} إلى بطولة؟` : `إلغاء البطولة لتاريخ ${date}؟`)) return;
 
       try {
         await fetch(SCRIPT_URL, {
@@ -309,9 +384,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "setTournament", date: date, isTournament: isTournament })
         });
-        showAlert(isTournament ? "🏆 تم تفعيل البطولة بنجاح!" : "✅ تم إيقاف البطولة بنجاح!");
+        showAlert(isTournament ? "🏆 تم تفعيل البطولة!" : "✅ تم إيقاف البطولة!");
+        loadAdminBookings();
       } catch (err) {
-        showAlert("حدث خطأ في الاتصال", "error");
+        showAlert("خطأ في الاتصال", "error");
       }
     }
 
@@ -321,18 +397,14 @@
       const phone = document.getElementById("manualPhone").value.trim();
 
       if (!date || !name || !phone || selectedSlots.length === 0) {
-        alert("يرجى ملء جميع الحقول واختيار ساعة واحدة على الأقل");
+        alert("يرجى ملء الحقول واختيار ساعة واحدة على الأقل");
         return;
       }
 
       if (!/^07[0-9]{9}$/.test(phone)) {
-        alert("رقم الهاتف غير صحيح (يجب أن يبدأ بـ 07 ويتكون من 11 رقم)");
+        alert("رقم الهاتف غير صحيح");
         return;
       }
-
-      const btn = document.getElementById("manualSubmitBtn");
-      btn.disabled = true;
-      btn.innerText = "جاري التنفيذ...";
 
       try {
         await fetch(SCRIPT_URL, {
@@ -342,16 +414,14 @@
           body: JSON.stringify({ action: "manualBooking", date: date, slots: selectedSlots, name: name, phone: phone })
         });
 
-        showAlert("✅ تم الحجز اليدوي بنجاح وتسجيله في الشيت!");
+        showAlert("✅ تم الحجز اليدوي بنجاح!");
         document.getElementById("manualName").value = "";
         document.getElementById("manualPhone").value = "";
         selectedSlots = [];
         document.querySelectorAll(".slot-checkbox").forEach(el => el.classList.remove("selected"));
+        loadAdminBookings();
       } catch (err) {
-        showAlert("فشل الحجز، حاول ثانية", "error");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "تنفيذ الحجز اليدوي";
+        showAlert("فشل الحجز", "error");
       }
     }
   </script>
