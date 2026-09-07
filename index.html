@@ -207,16 +207,20 @@
       font-weight: 800;
     }
 
-    /* 1. يوم البطولة: يبقى أصفر وثابت تماماً ولا يتأثر بالتحديد */
-    .day-chip.tournament-day {
+    /* يوم البطولة: يبقى أصفر وثابت تماماً ولا يتأثر نهائياً بالتحديد أو الكلاس active */
+    .day-chip.tournament-day,
+    .day-chip.tournament-day.active {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
+      box-shadow: none !important;
     }
-    .day-chip.tournament-day .day-name {
+    .day-chip.tournament-day .day-name,
+    .day-chip.tournament-day.active .day-name {
       color: var(--tournament-color) !important;
       font-weight: 800 !important;
     }
-    .day-chip.tournament-day .day-num {
+    .day-chip.tournament-day .day-num,
+    .day-chip.tournament-day.active .day-num {
       color: #ffffff !important;
     }
     .day-chip.tournament-day::after {
@@ -231,21 +235,21 @@
     }
 
     /* اليوم المحدد عادياً (خضراء كاملة بالخلفية) */
-    .day-chip.active {
+    .day-chip.active:not(.tournament-day) {
       background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
       box-shadow: 0 0 16px rgba(0, 255, 135, 0.35);
     }
-    .day-chip.active .day-name {
+    .day-chip.active:not(.tournament-day) .day-name {
       color: var(--primary);
       font-weight: 700;
     }
-    .day-chip.active .day-num {
+    .day-chip.active:not(.tournament-day) .day-num {
       color: #ffffff;
       font-weight: 900;
     }
 
-    /* 2. اليوم الحقيقي (إذا لم يتم اختياره): أطراف خضراء فقط بدون خلفية مفولة وبنفس ألوان النصوص العادية */
+    /* اليوم الحقيقي (إذا لم يتم اختياره): أطراف خضراء فقط بدون خلفية مفولة */
     .day-chip.is-today:not(.active):not(.tournament-day) {
       background: var(--slot-bg) !important;
       border-color: var(--primary) !important;
