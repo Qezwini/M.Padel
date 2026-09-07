@@ -752,7 +752,7 @@
 
  function playSuccessFeedback() {
       if ("vibrate" in navigator) {
-        navigator.vibrate([40, 60]);
+        navigator.vibrate([30, 40, 50]);
       }
       try {
         initAudio();
@@ -760,29 +760,29 @@
 
         const now = audioCtx.currentTime;
 
-        // النغمة الأولى (دافئة وهادئة)
+        // الرنة الأولى الخفيفة (Chime 1)
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
         osc1.type = "sine";
-        osc1.frequency.setValueAtTime(523.25, now); // C5
-        gain1.gain.setValueAtTime(0.15, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc1.frequency.setValueAtTime(1046.50, now); // C6
+        gain1.gain.setValueAtTime(0.12, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
         osc1.connect(gain1);
         gain1.connect(audioCtx.destination);
         osc1.start(now);
-        osc1.stop(now + 0.3);
+        osc1.stop(now + 0.18);
 
-        // النغمة الثانية (إشعار ناعم يكتمل بعد الأولى بكسر ثانية)
+        // الرنة الثانية الواضحة والعميقة (Chime 2 - النغمة الرئيسية)
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
         osc2.type = "sine";
-        osc2.frequency.setValueAtTime(783.99, now + 0.08); // G5
-        gain2.gain.setValueAtTime(0.18, now + 0.08);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc2.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+        gain2.gain.setValueAtTime(0.25, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
         osc2.connect(gain2);
         gain2.connect(audioCtx.destination);
         osc2.start(now + 0.08);
-        osc2.stop(now + 0.45);
+        osc2.stop(now + 0.65);
 
       } catch (e) {}
     }
