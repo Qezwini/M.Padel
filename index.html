@@ -227,9 +227,10 @@
       font-weight: 800;
     }
 
+    /* اليوم المحدد حالياً (خضراء كاملة بالخلفية) */
     .day-chip.active {
-      background: rgba(0, 255, 135, 0.18);
-      border-color: var(--primary);
+      background: rgba(0, 255, 135, 0.18) !important;
+      border-color: var(--primary) !important;
       box-shadow: 0 0 16px rgba(0, 255, 135, 0.35);
     }
     .day-chip.active .day-name {
@@ -241,13 +242,26 @@
       font-weight: 900;
     }
 
-    /* استعادة الخلفية والتنسيق الأخضر لليوم الحالي بدقة */
-    .day-chip.is-today {
-      background: rgba(0, 255, 135, 0.15) !important;
+    /* اليوم الحقيقي (إذا لم يتم اختياره، تظل أطرافه خضراء بدون خلفية مفولة) */
+    .day-chip.is-today:not(.active) {
+      background: var(--slot-bg) !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 10px rgba(0, 255, 135, 0.2);
+    }
+    .day-chip.is-today:not(.active) .day-name {
+      color: var(--primary);
+    }
+    .day-chip.is-today:not(.active) .day-num {
+      color: var(--primary);
+    }
+
+    /* إذا كان اليوم الحقيقي هو نفسه المحدد حالياً */
+    .day-chip.is-today.active {
+      background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
     }
-    .day-chip.is-today .day-num {
-      color: var(--primary) !important;
+    .day-chip.is-today.active .day-num {
+      color: #ffffff !important;
     }
 
     .slots-grid {
