@@ -207,14 +207,17 @@
       font-weight: 800;
     }
 
-    /* تنسيق يوم البطولة في الشريط بالأعلى (بدون أيقونة الكأس) */
+    /* 1. يوم البطولة: يبقى أصفر وثابت تماماً ولا يتأثر بالتحديد */
     .day-chip.tournament-day {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
     }
     .day-chip.tournament-day .day-name {
       color: var(--tournament-color) !important;
-      font-weight: 800;
+      font-weight: 800 !important;
+    }
+    .day-chip.tournament-day .day-num {
+      color: #ffffff !important;
     }
     .day-chip.tournament-day::after {
       content: 'بطولة';
@@ -227,7 +230,7 @@
       font-weight: 800;
     }
 
-    /* اليوم المحدد حالياً (خضراء كاملة بالخلفية) */
+    /* اليوم المحدد عادياً (خضراء كاملة بالخلفية) */
     .day-chip.active {
       background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
@@ -242,25 +245,25 @@
       font-weight: 900;
     }
 
-    /* اليوم الحقيقي (إذا لم يتم اختياره، تظل أطرافه خضراء بدون خلفية مفولة) */
-    .day-chip.is-today:not(.active) {
+    /* 2. اليوم الحقيقي (إذا لم يتم اختياره): أطراف خضراء فقط بدون خلفية مفولة وبنفس ألوان النصوص العادية */
+    .day-chip.is-today:not(.active):not(.tournament-day) {
       background: var(--slot-bg) !important;
       border-color: var(--primary) !important;
       box-shadow: 0 0 10px rgba(0, 255, 135, 0.2);
     }
-    .day-chip.is-today:not(.active) .day-name {
-      color: var(--primary);
+    .day-chip.is-today:not(.active):not(.tournament-day) .day-name {
+      color: var(--text-muted);
     }
-    .day-chip.is-today:not(.active) .day-num {
-      color: var(--primary);
+    .day-chip.is-today:not(.active):not(.tournament-day) .day-num {
+      color: #fff;
     }
 
     /* إذا كان اليوم الحقيقي هو نفسه المحدد حالياً */
-    .day-chip.is-today.active {
+    .day-chip.is-today.active:not(.tournament-day) {
       background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
     }
-    .day-chip.is-today.active .day-num {
+    .day-chip.is-today.active:not(.tournament-day) .day-num {
       color: #ffffff !important;
     }
 
