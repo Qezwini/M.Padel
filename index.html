@@ -207,7 +207,7 @@
       font-weight: 800;
     }
 
-    /* تنسيق يوم البطولة في الشريط بالأعلى */
+    /* تنسيق يوم البطولة في الشريط بالأعلى (بدون أيقونة الكأس) */
     .day-chip.tournament-day {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
@@ -217,7 +217,7 @@
       font-weight: 800;
     }
     .day-chip.tournament-day::after {
-      content: '🏆 بطولة';
+      content: 'بطولة';
       position: absolute;
       bottom: 4px;
       left: 50%;
@@ -240,13 +240,15 @@
       color: #ffffff;
       font-weight: 900;
     }
+
+    /* استعادة الخلفية والتنسيق الأخضر لليوم الحالي بدقة */
     .day-chip.is-today {
-  background: rgba(0, 255, 135, 0.18) !important;
-  border-color: var(--primary) !important;
-}
-.day-chip.is-today .day-num {
-  color: #00ff87 !important;
-}
+      background: rgba(0, 255, 135, 0.15) !important;
+      border-color: var(--primary) !important;
+    }
+    .day-chip.is-today .day-num {
+      color: var(--primary) !important;
+    }
 
     .slots-grid {
       display: grid;
