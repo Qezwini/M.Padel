@@ -737,22 +737,41 @@
       }, { passive: false });
     }
 
+    let audioCtx = null;
+
+    function initAudio() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {}
+    }
+
     function playSuccessFeedback() {
       if ("vibrate" in navigator) {
-        navigator.vibrate([40, 60, 80]);
+        navigator.vibrate([60, 50, 80]);
       }
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        initAudio();
+        if (!audioCtx) return;
+
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+
         osc.type = "sine";
         osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.start();
+
+        osc.start(audioCtx.currentTime);
         osc.stop(audioCtx.currentTime + 0.35);
       } catch (e) {}
     }
@@ -988,6 +1007,7 @@
     }
 
     submitBtn.onclick = async () => {
+      initAudio();
       submitBtn.disabled = true;
       submitBtn.classList.add("loading");
       btnText.innerText = "جاري التحقق وإرسال الحجز...";
