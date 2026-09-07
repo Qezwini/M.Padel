@@ -31,6 +31,9 @@
       --expired-bg: rgba(255, 255, 255, 0.02);
       --expired-border: rgba(255, 255, 255, 0.04);
       --expired-text: #475569;
+      --tournament-color: #ffd700;
+      --tournament-bg: rgba(255, 215, 0, 0.12);
+      --tournament-border: rgba(255, 215, 0, 0.4);
     }
 
     * {
@@ -204,6 +207,29 @@
       font-weight: 800;
     }
 
+    /* كرت اليوم إذا كانت هناك بطولة */
+    .day-chip.tournament-day {
+      border-color: var(--tournament-color) !important;
+      background: var(--tournament-bg) !important;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.3) !important;
+      opacity: 1 !important;
+      filter: none !important;
+    }
+    .day-chip.tournament-day .day-name {
+      color: var(--tournament-color) !important;
+      font-weight: 800;
+    }
+    .day-chip.tournament-day::after {
+      content: '🏆 بطولة';
+      color: var(--tournament-color) !important;
+      font-size: 9px;
+      font-weight: 900;
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
     .day-chip.active {
       background: rgba(0, 255, 135, 0.18);
       border-color: var(--primary);
@@ -301,6 +327,21 @@
     }
     .slot-btn.booked .slot-status {
       color: var(--booked-text);
+    }
+
+    /* كلاس الساعة أثناء البطولة (أصفر) */
+    .slot-btn.tournament {
+      background: var(--tournament-bg) !important;
+      border-color: var(--tournament-border) !important;
+      cursor: not-allowed;
+    }
+    .slot-btn.tournament .slot-time-box {
+      color: #fff;
+      text-decoration: none;
+    }
+    .slot-btn.tournament .slot-status {
+      color: var(--tournament-color) !important;
+      font-weight: 800;
     }
 
     .slot-btn.expired {
@@ -692,7 +733,6 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
     
-    // تحميل صوت Apple Pay الأصلي مسبقاً
     const applePaySound = new Audio('applepay.mp3');
     applePaySound.preload = 'auto';
 
@@ -712,6 +752,8 @@
     let selectedIndices = [];
     let bookedSlots = [];
     let soldOutDates = [];
+    let tournamentDates = [];
+    let isCurrentDayTournament = false;
 
     const daysList = document.getElementById("daysList");
     const slotsGrid = document.getElementById("slotsGrid");
@@ -726,7 +768,7 @@
     window.addEventListener("online", () => {
       offlineBanner.style.display = "none";
       fetchBookedSlots(false);
-      checkSoldOutDays();
+      checkSpecialDays();
     });
     window.addEventListener("offline", () => {
       offlineBanner.style.display = "block";
@@ -771,10 +813,14 @@
       if (savedPhone) custPhone.value = savedPhone;
     }
 
-    async function checkSoldOutDays() {
+    async function checkSpecialDays() {
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=getSoldOutDays&totalSlots=8`);
-        soldOutDates = await res.json();
+        const [soldRes, tourRes] = await Promise.all([
+          fetch(`${SCRIPT_URL}?action=getSoldOutDays&totalSlots=8`),
+          fetch(`${SCRIPT_URL}?action=getTournaments`)
+        ]);
+        soldOutDates = await soldRes.json();
+        tournamentDates = await tourRes.json();
         updateDaysAppearance();
       } catch (e) {}
     }
@@ -782,10 +828,14 @@
     function updateDaysAppearance() {
       document.querySelectorAll(".day-chip").forEach(chip => {
         const dStr = chip.getAttribute("data-date");
-        if (soldOutDates.includes(dStr)) {
-          chip.classList.add("sold-out");
-        } else {
+        if (tournamentDates.includes(dStr)) {
+          chip.classList.add("tournament-day");
           chip.classList.remove("sold-out");
+        } else if (soldOutDates.includes(dStr)) {
+          chip.classList.add("sold-out");
+          chip.classList.remove("tournament-day");
+        } else {
+          chip.classList.remove("sold-out", "tournament-day");
         }
       });
     }
@@ -817,7 +867,7 @@
         }
       }
       fetchBookedSlots(true);
-      checkSoldOutDays();
+      checkSpecialDays();
     }
 
     function selectDate(dateStr, isToday, element) {
@@ -843,18 +893,20 @@
       if (showSkeleton) renderSkeletonLoading();
       try {
         const res = await fetch(`${SCRIPT_URL}?action=getSlots&date=${selectedDate}`);
-        bookedSlots = await res.json();
+        const data = await res.json();
+        bookedSlots = data.bookedSlots || [];
+        isCurrentDayTournament = !!data.isTournament;
       } catch (e) {
         bookedSlots = [];
+        isCurrentDayTournament = false;
       }
       renderSlots();
     }
 
-    // التحديث التلقائي الصامت كل 12 ثانية
     setInterval(() => {
       if (document.visibilityState === "visible" && navigator.onLine) {
         fetchBookedSlots(false);
-        checkSoldOutDays();
+        checkSpecialDays();
       }
     }, 12000);
 
@@ -878,7 +930,10 @@
         let statusClass = "";
         let statusText = "متاح";
 
-        if (isBooked) {
+        if (isCurrentDayTournament) {
+          statusClass = "tournament";
+          statusText = "🏆 بطولة M. PADEL";
+        } else if (isBooked) {
           statusClass = "booked";
           statusText = "محجوز";
           if (isSelected) {
@@ -904,7 +959,7 @@
         `;
 
         div.onclick = () => {
-          if (isBooked || expired) {
+          if (isCurrentDayTournament || isBooked || expired) {
             triggerHaptic();
             div.classList.remove("shake-anim");
             void div.offsetWidth;
@@ -920,6 +975,7 @@
     }
 
     function handleSlotSelection(id) {
+      if (isCurrentDayTournament) return;
       if (selectedIndices.includes(id)) {
         selectedIndices = selectedIndices.filter(i => i !== id);
       } else {
@@ -971,7 +1027,10 @@
       const hasTwoWords = trimmedName.split(/\s+/).filter(w => w.length > 0).length >= 2;
       const isPhoneValid = /^07[0-9]{9}$/.test(custPhone.value.trim());
 
-      if (hoursCount > 0 && hasTwoWords && isPhoneValid) {
+      if (isCurrentDayTournament) {
+        submitBtn.disabled = true;
+        btnText.innerText = "اليوم مخصص لبطولة الملعب";
+      } else if (hoursCount > 0 && hasTwoWords && isPhoneValid) {
         submitBtn.disabled = false;
         btnText.innerText = `تأكيد حجز (${hoursCount} ${hoursCount === 1 ? 'ساعة' : hoursCount === 2 ? 'ساعتين' : 'ساعات'})`;
       } else {
@@ -983,9 +1042,7 @@
     }
 
     submitBtn.onclick = async () => {
-      // تنشيط الصوت فوراً من النقرة الأولى للمستخدم
       applePaySound.load();
-
       submitBtn.disabled = true;
       submitBtn.classList.add("loading");
       btnText.innerText = "جاري التحقق وإرسال الحجز...";
@@ -995,11 +1052,12 @@
 
       try {
         const verifyRes = await fetch(`${SCRIPT_URL}?action=getSlots&date=${selectedDate}`);
-        const currentBooked = await verifyRes.json();
-        const conflict = chosenSlots.some(s => currentBooked.includes(s));
+        const data = await verifyRes.json();
+        const currentBooked = data.bookedSlots || [];
+        const conflict = chosenSlots.some(s => currentBooked.includes(s)) || data.isTournament;
 
         if (conflict) {
-          alert("⚠️ نعتذر منك! قام شخص آخر بحجز إحدى هذه الساعات قبل قليل. سيتم تحديث الأوقات الآن.");
+          alert("⚠️ نعتذر منك! تم حجز الوقت أو إغلاقه للتو. سيتم تحديث الصفحة الآن.");
           submitBtn.classList.remove("loading");
           selectedIndices = [];
           fetchBookedSlots(true);
@@ -1024,7 +1082,7 @@
         document.getElementById("successModal").style.display = "flex";
         selectedIndices = [];
         fetchBookedSlots(false);
-        checkSoldOutDays();
+        checkSpecialDays();
 
       } catch (err) {
         alert("حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة ثانية.");
