@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M. PADEL | لوحة التحكم الإدارية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #060b14;
+      --glass-bg: rgba(16, 28, 48, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --primary: #00ff87;
+      --primary-glow: rgba(0, 255, 135, 0.35);
+      --tournament: #ffd700;
+      --tournament-glow: rgba(255, 215, 0, 0.35);
+      --danger: #ef4444;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(0, 255, 135, 0.1) 0px, transparent 50%),
+        radial-gradient(at 90% 85%, rgba(20, 110, 245, 0.15) 0px, transparent 55%),
+        radial-gradient(circle at 50% 50%, #0d1a2d 0%, #050911 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 14px;
+      color: var(--text-main);
+    }
+
+    /* شاشة تسجيل الدخول */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(6, 11, 20, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .admin-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--glass-border);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 30px;
+      width: 100%;
+      max-width: 440px;
+      padding: 28px 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .brand-title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group input, .input-group select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
+    }
+    .input-group select option {
+      background: #0d1a2d;
+      color: #fff;
+    }
+
+    .action-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #05140d;
+      border: none;
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 22px var(--primary-glow);
+      transition: all 0.2s ease;
+      margin-top: 6px;
+    }
+    .action-btn.tournament-btn {
+      background: var(--tournament);
+      box-shadow: 0 8px 22px var(--tournament-glow);
+      color: #1a1500;
+    }
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 22px 0;
+    }
+
+    .dashboard-container {
+      display: none;
+    }
+
+    .slots-picker {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .slot-checkbox {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .slot-checkbox.selected {
+      background: rgba(0, 255, 135, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .alert-box {
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .alert-box.success { background: rgba(0, 255, 135, 0.1); color: var(--primary); border: 1px solid rgba(0, 255, 135, 0.3); }
+    .alert-box.error { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+  </style>
+</head>
+<body>
+
+  <!-- شاشة حماية كلمة السر -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="admin-card" style="box-shadow: 0 0 40px rgba(0,255,135,0.15);">
+      <div class="brand-title">🔒 لوحة تحكم M. PADEL</div>
+      <div class="input-group">
+        <span class="section-label">أدخل رمز المرور الإداري</span>
+        <input type="password" id="adminPin" placeholder="****" maxlength="6">
+      </div>
+      <button class="action-btn" onclick="checkPin()">دخول للنظام</button>
+      <div id="loginError" style="color: var(--danger); font-size: 12px; text-align: center; margin-top: 10px; display: none;">الرمز غير صحيح!</div>
+    </div>
+  </div>
+
+  <!-- لوحة التحكم الرئيسية -->
+  <div class="admin-card">
+    <div class="brand-title">⚡ M. PADEL Admin</div>
+    
+    <div id="alertBox" class="alert-box"></div>
+
+    <!-- 1. قسم إدارة البطولات والأيام -->
+    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 12px;">🏆 إدارة أيام البطولات</div>
+    
+    <div class="input-group">
+      <span class="section-label">اختر التاريخ</span>
+      <input type="date" id="tourDate">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+      <button class="action-btn tournament-btn" onclick="setTournamentStatus(true)" style="margin:0; font-size:13px; padding:12px;">تفعيل كـ بطولة 🟡</button>
+      <button class="action-btn" onclick="setTournamentStatus(false)" style="margin:0; font-size:13px; padding:12px; background:rgba(255,255,255,0.06); color:#fff;">إلغاء البطولة 🟢</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 2. قسم الحجز اليدوي السريع -->
+    <div style="font-weight: 800; font-size: 14px; color: var(--primary); margin-bottom: 12px;">📞 حجز يدوي فوري (لهواتف الزبائن)</div>
+
+    <div class="input-group">
+      <span class="section-label">تاريخ الحجز</span>
+      <input type="date" id="manualDate">
+    </div>
+
+    <div class="input-group">
+      <span class="section-label">اسم الزبون</span>
+      <input type="text" id="manualName" placeholder="الاسم الثنائي">
+    </div>
+
+    <div class="input-group">
+      <span class="section-label">رقم الهاتف</span>
+      <input type="tel" id="manualPhone" placeholder="07XXXXXXXXX" maxlength="11">
+    </div>
+
+    <span class="section-label">اختر الساعات المطلوبة:</span>
+    <div class="slots-picker" id="slotsPicker"></div>
+
+    <button class="action-btn" onclick="submitManualBooking()" id="manualSubmitBtn">تنفيذ الحجز اليدوي</button>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4OG-Ku3cnKExXU5jSFW8l3DWE15-9x7upZBg2wryBKOfHA2G7bbka52-BVdD5Io_g/exec";
+    const ADMIN_PIN = "1234"; // 🔑 تقدر تغير رمز المرور من هنا بسهولة
+
+    const SLOTS_LIST = [
+      "06:00 م - 07:00 م", "07:00 م - 08:00 م",
+      "08:00 م - 09:00 م", "09:00 م - 10:00 م",
+      "10:00 م - 11:00 م", "11:00 م - 12:00 ص",
+      "12:00 ص - 01:00 ص", "01:00 ص - 02:00 ص"
+    ];
+
+    let selectedSlots = [];
+
+    function checkPin() {
+      const pin = document.getElementById("adminPin").value.trim();
+      if (pin === ADMIN_PIN) {
+        document.getElementById("loginOverlay").style.display = "none";
+        initAdminPanel();
+      } else {
+        document.getElementById("loginError").style.display = "block";
+      }
+    }
+
+    function initAdminPanel() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById("tourDate").value = today;
+      document.getElementById("manualDate").value = today;
+
+      const picker = document.getElementById("slotsPicker");
+      picker.innerHTML = "";
+      SLOTS_LIST.forEach((slot, index) => {
+        const div = document.createElement("div");
+        div.className = "slot-checkbox";
+        div.innerText = slot;
+        div.onclick = () => {
+          if (selectedSlots.includes(slot)) {
+            selectedSlots = selectedSlots.filter(s => s !== slot);
+            div.classList.remove("selected");
+          } else {
+            selectedSlots.push(slot);
+            div.classList.add("selected");
+          }
+        };
+        picker.appendChild(div);
+      });
+    }
+
+    function showAlert(msg, type = "success") {
+      const box = document.getElementById("alertBox");
+      box.innerText = msg;
+      box.className = `alert-box ${type}`;
+      box.style.display = "block";
+      setTimeout(() => { box.style.display = "none"; }, 4000);
+    }
+
+    async function setTournamentStatus(isTournament) {
+      const date = document.getElementById("tourDate").value;
+      if (!date) return alert("اختر التاريخ أولاً");
+
+      if (!confirm(isTournament ? `هل أنت متأكد من تحويل تاريخ ${date} إلى يوم بطولة؟` : `هل تريد إلغاء حالة البطولة لتاريخ ${date}؟`)) return;
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "setTournament", date: date, isTournament: isTournament })
+        });
+        showAlert(isTournament ? "🏆 تم تفعيل البطولة بنجاح!" : "✅ تم إيقاف البطولة بنجاح!");
+      } catch (err) {
+        showAlert("حدث خطأ في الاتصال", "error");
+      }
+    }
+
+    async function submitManualBooking() {
+      const date = document.getElementById("manualDate").value;
+      const name = document.getElementById("manualName").value.trim();
+      const phone = document.getElementById("manualPhone").value.trim();
+
+      if (!date || !name || !phone || selectedSlots.length === 0) {
+        alert("يرجى ملء جميع الحقول واختيار ساعة واحدة على الأقل");
+        return;
+      }
+
+      if (!/^07[0-9]{9}$/.test(phone)) {
+        alert("رقم الهاتف غير صحيح (يجب أن يبدأ بـ 07 ويتكون من 11 رقم)");
+        return;
+      }
+
+      const btn = document.getElementById("manualSubmitBtn");
+      btn.disabled = true;
+      btn.innerText = "جاري التنفيذ...";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "manualBooking", date: date, slots: selectedSlots, name: name, phone: phone })
+        });
+
+        showAlert("✅ تم الحجز اليدوي بنجاح وتسجيله في الشيت!");
+        document.getElementById("manualName").value = "";
+        document.getElementById("manualPhone").value = "";
+        selectedSlots = [];
+        document.querySelectorAll(".slot-checkbox").forEach(el => el.classList.remove("selected"));
+      } catch (err) {
+        showAlert("فشل الحجز، حاول ثانية", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "تنفيذ الحجز اليدوي";
+      }
+    }
+  </script>
+</body>
+</html>
