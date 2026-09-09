@@ -207,7 +207,6 @@
       font-weight: 800;
     }
 
-    /* يوم البطولة العادي (غير محدد) */
     .day-chip.tournament-day {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
@@ -230,7 +229,6 @@
       font-weight: 800;
     }
 
-    /* يوم البطولة عند النقر عليه وتحديده (توهج وإطار أصفر ساطع) */
     .day-chip.tournament-day.active {
       background: rgba(255, 215, 0, 0.22) !important;
       border-color: var(--tournament-color) !important;
@@ -244,7 +242,6 @@
       color: #ffffff !important;
     }
 
-    /* اليوم المحدد عادياً (خضراء كاملة بالخلفية) */
     .day-chip.active:not(.tournament-day) {
       background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
@@ -259,7 +256,6 @@
       font-weight: 900;
     }
 
-    /* اليوم الحقيقي (إذا لم يتم اختياره): أطراف خضراء فقط بدون خلفية مفولة */
     .day-chip.is-today:not(.active):not(.tournament-day) {
       background: var(--slot-bg) !important;
       border-color: var(--primary) !important;
@@ -272,7 +268,6 @@
       color: #fff;
     }
 
-    /* إذا كان اليوم الحقيقي هو نفسه المحدد حالياً */
     .day-chip.is-today.active:not(.tournament-day) {
       background: rgba(0, 255, 135, 0.18) !important;
       border-color: var(--primary) !important;
@@ -363,7 +358,6 @@
       color: var(--booked-text);
     }
 
-    /* كلاس ساعات البطولة باللون الأصفر */
     .slot-btn.tournament {
       background: var(--tournament-bg) !important;
       border-color: var(--tournament-border) !important;
@@ -699,7 +693,7 @@
 
     <div class="input-group">
       <span class="section-label">رقم الهاتف (واتساب)</span>
-      <input type="tel" id="custPhone" placeholder="07XXXXXXXXX" maxlength="11" autocomplete="off">
+      <input type="tel" id="custPhone" placeholder="07XXXXXXXXX" maxlength="11" autocomplete="off" oninput="convertArabicNumbers(this)">
     </div>
 
     <div class="price-container">
@@ -797,6 +791,20 @@
     const btnText = document.getElementById("btnText");
     const resetSlotsBtn = document.getElementById("resetSlotsBtn");
     const offlineBanner = document.getElementById("offlineBanner");
+
+    // دالة تحويل الأرقام العربية إلى إنجليزية أوتوماتيكياً
+    function convertArabicNumbers(input) {
+      var arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g,
+                           /۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g];
+      var englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      
+      var val = input.value;
+      for (var i = 0; i < arabicNumbers.length; i++) {
+        val = val.replace(arabicNumbers[i], englishNumbers[i]);
+      }
+      input.value = val;
+    }
 
     window.addEventListener("online", () => {
       offlineBanner.style.display = "none";
@@ -1025,6 +1033,7 @@
     }
 
     custPhone.addEventListener("input", (e) => {
+      convertArabicNumbers(e.target);
       e.target.value = e.target.value.replace(/[^0-9]/g, '');
       localStorage.setItem("mpadel_cust_phone", e.target.value);
       updateUI();
