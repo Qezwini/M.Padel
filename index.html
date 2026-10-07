@@ -949,7 +949,7 @@
       if (!isTodayDate) return false;
       const now = new Date();
       const currentHour = now.getHours();
-      if (currentHour < 18) return false;
+      if (currentHour < 17) return false;
       return currentHour >= slotHour;
     }
 
